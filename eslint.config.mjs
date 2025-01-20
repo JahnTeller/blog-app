@@ -8,7 +8,11 @@ const __dirname = dirname(__filename);
 const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
-
+compat.config({
+  rules: {
+    "@typescript-eslint/no-explicit-any": "off",
+  },
+});
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 ];

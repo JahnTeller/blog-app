@@ -8,8 +8,9 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }) {
+  const paramSlug = await params;
   const post = await fs.readFile(
-    path.join(process.cwd(), "src/posts", `${params.slug}.mdx`),
+    path.join(process.cwd(), "src/posts", `${paramSlug.slug}.mdx`),
     "utf-8"
   );
   const content = await compileMDX<{ title: string; description: string }>({
@@ -22,8 +23,9 @@ export async function generateMetadata({
 }
 
 export default async function page({ params }: { params: { slug: string } }) {
+  const paramSlug = await params;
   const post = await fs.readFile(
-    path.join(process.cwd(), "src/posts", `${params.slug}.mdx`),
+    path.join(process.cwd(), "src/posts", `${paramSlug.slug}.mdx`),
     "utf-8"
   );
   const content = await compileMDX<{ title: string }>({

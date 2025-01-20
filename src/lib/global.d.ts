@@ -10,5 +10,5 @@ export default interface postFrontmatter {
 
 export default interface postFrontmatterResponse {
   frontmatter: postFrontmatter;
-  content: ReactElement<unknown, string | JSXElementConstructor<any>>;
+  content: React.ReactNode;
 }

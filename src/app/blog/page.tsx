@@ -30,7 +30,9 @@ export default async function page() {
   return (
     <nav className="flex flex-col gap-2">
       {posts.map((post) => (
-        <Link href={`blog/${post.slug}`}>{post.title}</Link>
+        <Link href={`blog/${post.slug}`} key={post.slug}>
+          {post.title}
+        </Link>
       ))}
     </nav>
   );

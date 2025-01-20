@@ -1,4 +1,3 @@
-import postFrontmatterResponse from "@/lib/global";
 import Image from "next/image";
 import { format } from "date-fns";
 import Link from "next/link";
@@ -9,7 +8,7 @@ export const PostCard = ({
 }: {
   props: {
     frontmatter: postFrontmatter;
-    content: ReactElement<unknown, string | JSXElementConstructor<any>>;
+    content: React.ReactNode;
   };
 }) => {
   return (
