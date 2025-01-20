@@ -1,101 +1,123 @@
 import Image from "next/image";
+import { format } from "date-fns";
+import { capitalizeAllFirstLetter, capitalizeFirstLetter } from "@/lib/utils";
+import { MoveRight } from "lucide-react";
+import Link from "next/link";
+import { PostCard } from "@/components/postCard";
+import { promises as fs } from "fs";
+import path from "path";
+import { compileMDX } from "next-mdx-remote/rsc";
+import postFrontmatter from "@/lib/global";
 
-export default function Home() {
+export default async function Home() {
+  const filesName = await fs.readdir(
+    path.join(process.cwd(), "src/posts"),
+    "utf-8"
+  );
+  const posts = await Promise.all(
+    filesName.map(async (fileName) => {
+      const post = await fs.readFile(
+        path.join(process.cwd(), "src/posts", fileName),
+        "utf-8"
+      );
+
+      const { frontmatter, content } = await compileMDX<postFrontmatter>({
+        source: post,
+        options: { parseFrontmatter: true },
+      });
+      return { frontmatter, content };
+    })
+  );
+  console.log(posts, "post");
+
+  const sortedPosts = posts.sort((a, b) => {
+    const dateA = new Date(a.frontmatter.date);
+    const dateB = new Date(b.frontmatter.date);
+    return dateB.getTime() - dateA.getTime();
+  });
+
+  // if (sortedPosts.length === 0) {
+  //   return <div>Loading...</div>;
+  // }
+  // console.log(sortedPosts[0]);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div>
+      <header className="flex flex-col items-center justify-center bg-gray-200 p-4 rounded-2xl my-4">
+        <h1 className="text-sm tracking-widest">WELCOME TO BULETIN</h1>
+        <p className="text-2xl text-center break-words max-w-[50ch]">
+          Craft narratives{" "}
+          <span className="inline-flex relative w-[1.5rem] h-[1.5rem]">
+            <Image src="/hand-pencil.svg" fill alt="Picture of the author" />
+          </span>{" "}
+          that ignite <span className="text-red-500"> inspiration </span>
+          <span className="inline-flex relative w-[1.5rem] h-[1.5rem]">
+            <Image src="/idea.svg" fill alt="Picture of the author" />
+          </span>
+          ,<span className="text-red-500"> knowlegde </span>
+          <span className="inline-flex relative w-[1.5rem] h-[1.5rem]">
+            <Image src="/book.svg" fill alt="Picture of the author" />
+          </span>
+          , and <span className="text-red-500">entertainment</span>
+          <span className="inline-flex relative w-[1.5rem] h-[1.5rem]">
+            <Image src="/film.svg" fill alt="Picture of the author" />
+          </span>
+        </p>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+      <section>
+        {" "}
+        {/* this is the lastest post */}
+        <Link
+          href={`/blog/${sortedPosts[0].frontmatter.slug}`}
+          className="flex gap-3 flex-col md:flex-row items-center justify-center md:justify-between md:items-start "
+        >
+          {/* lastest post cover image */}
+          <div className="relative w-full md:min-w-[30%] aspect-video">
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+              className="object-cover rounded-lg"
+              src={sortedPosts[0].frontmatter.coverImage}
+              alt={"cover image"}
+              fill
+              sizes="100%"
+              priority
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          </div>
+          {/* lasted post detail */}
+          <div className="w-full gap-3 flex flex-col md:w-[60%]">
+            <div className="flex gap-3">
+              <div className="">{sortedPosts[0].frontmatter.author}</div>
+              <div>
+                {format(
+                  new Date(sortedPosts[0].frontmatter.date),
+                  "hh:mm dd/MM/yyyy "
+                )}
+              </div>
+            </div>
+            <div className="text-4xl ">
+              {capitalizeAllFirstLetter(sortedPosts[0].frontmatter.title)}
+            </div>
+            <div className="line-clamp-3">{sortedPosts[0].content}</div>
+            <div className="text-red-500 font-semibold">
+              {capitalizeFirstLetter(sortedPosts[0].frontmatter.tag)}
+            </div>
+          </div>
+        </Link>
+        {/* new posts */}
+        <div>
+          <div className="flex justify-between items-center p-3">
+            <h1 className="text-2xl">New Post</h1>{" "}
+            <Link className="flex gap-1" href={"/post"}>
+              See more <MoveRight />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3" key="new-post">
+            {sortedPosts.slice(1, 5).map((post) => (
+              <PostCard props={post} key={post.frontmatter.slug} />
+            ))}
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
     </div>
   );
 }
