@@ -2,7 +2,6 @@ import Image from "next/image";
 import { format } from "date-fns";
 import Link from "next/link";
 import postFrontmatter from "@/lib/global";
-import { ReactElement, JSXElementConstructor } from "react";
 export const PostCard = ({
   props,
 }: {
